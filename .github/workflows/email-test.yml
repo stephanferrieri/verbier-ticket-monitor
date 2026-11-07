@@ -1,0 +1,32 @@
+name: Manual email delivery test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Send one clearly labelled technical test
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          payload = {
+              'sender': {'email': os.environ['MAIL_FROM'], 'name': 'Alerte Verbier'},
+              'to': [{'email': os.environ['MAIL_TO']}],
+              'subject': 'TEST technique — Alerte Verbier',
+              'textContent': 'Ceci est un unique test technique de livraison depuis GitHub Actions. Aucune disponibilité de billets n’est annoncée. Les futures alertes nécessiteront la confirmation de deux places train + ski pour le 5 décembre 2026.'
+          }
+          request = urllib.request.Request('https://api.brevo.com/v3/smtp/email', data=json.dumps(payload).encode(), headers={'api-key': os.environ['BREVO_API_KEY'], 'Content-Type': 'application/json'}, method='POST')
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  print('Email test accepted:', response.status)
+          except urllib.error.HTTPError as error:
+              print('Email test rejected:', error.code)
+              raise SystemExit(1)
+          PY
