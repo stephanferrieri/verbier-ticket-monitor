@@ -1,0 +1,28 @@
+name: Verbier ticket monitor
+on:
+  schedule:
+    - cron: '2-57/5 * * * 1-5'
+      timezone: 'Europe/Zurich'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: verbier-ticket-monitor
+  cancel-in-progress: false
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check availability and notify only on confirmation
+        run: node monitor.mjs
+        env:
+          MONITOR_ENABLED: ${{ vars.MONITOR_ENABLED }}
+          GH_TOKEN: ${{ github.token }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
