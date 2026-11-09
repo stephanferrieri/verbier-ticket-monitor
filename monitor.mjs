@@ -71,7 +71,8 @@ async function main() {
   if (state.halted) throw new Error('Monitoring paused after access restriction. Review site rules, then clear halted in state.');
   if (Date.now() < (state.nextCheck || 0)) {console.log('Rate-limit cooldown active.'); return;}
   // Persist before website requests, including manual runs. Missing write permission fails closed.
-  state.nextCheck=Date.now()+300000; await save();
+  // Allow one minute of runner-start jitter between nominal five-minute triggers.
+  state.nextCheck=Date.now()+240000; await save();
   async function site(path, json=false) {
     const r = await fetch(BASE+path,{redirect:'manual',headers:{'User-Agent':'VerbierTicketMonitor/1.0 (+https://github.com/'+process.env.GITHUB_REPOSITORY+')','Cache-Control':'no-cache',Accept:json?'application/json':'text/html,text/plain'},signal:AbortSignal.timeout(20000)});
     if ([401,403].includes(r.status)) {state.halted=true; await save(); throw new Error('Site denied access; stopped without bypass.');}

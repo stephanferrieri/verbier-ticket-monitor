@@ -1,6 +1,6 @@
 # Alerte Verbier — 2 billets train + ski, 5 décembre 2026
 
-**Statut initial : non activé.** Le code et la planification sont prêts ; l'envoi nécessite les secrets ci-dessous et la variable d'activation. Aucun compte de billetterie ni moyen de paiement n'est utilisé.
+**Activé le 9 novembre 2026.** cron-job.org déclenche le workflow GitHub toutes les cinq minutes en semaine (Europe/Rome, mêmes heures que la Suisse). Le calendrier natif GitHub a été retiré après des déclenchements manquants. Les secrets email et MONITOR_ENABLED=true sont configurés ; un test email a été livré. La tâche externe 8824488 expire le 5 décembre 2026 ; son jeton GitHub est limité à ce dépôt (Actions lecture/écriture) et expire le 9 décembre. Aucun compte de billetterie ni moyen de paiement n'est utilisé.
 
 ## Ce que le suivi vérifie
 
@@ -24,7 +24,7 @@
 
 ## Planification et coût
 
-Le workflow est exécuté sur GitHub, ordinateur personnel éteint, toutes les 5 minutes du lundi au vendredi en heure suisse (24 h/24). Les minutes sont décalées à 02, 07, 12, etc. GitHub peut retarder ou supprimer des exécutions : aucune garantie de délai de cinq minutes.
+cron-job.org demande une exécution GitHub toutes les cinq minutes, du lundi au vendredi (00, 05, 10, etc.), ordinateur personnel éteint. Le planificateur et les runners peuvent avoir du retard : aucune garantie de cinq minutes exactes.
 
 Le script arrête les consultations après le vendredi **4 décembre 2026**. Désactiver ensuite le workflow dans Actions pour arrêter aussi les démarrages inutiles. Sans variable d'activation il reste inactif. L'alerte horaire ChatGPT est indépendante.
 
@@ -34,7 +34,7 @@ Les runners standard GitHub sont gratuits dans un dépôt public. Le forfait gra
 
 Les routes JSON sont celles déclarées par la page officielle et utilisées par son formulaire, sans authentification. `robots.txt` est consulté avant les requêtes à chaque vérification ; ses exclusions sont respectées. Les conditions générales consultées le 7 novembre 2026 n'établissent pas une autorisation explicite de robot : respecter toute nouvelle restriction et arrêter le suivi si l'exploitant le demande.
 
-Une vérification ordinaire fait 3 lectures (robots, page, disponibilité). Si deux places sont annoncées, elle fait jusqu'à 2 lectures supplémentaires (tarif, confirmation). Aucun ajout au panier, aucun CAPTCHA résolu, aucun contournement, proxy ou changement d'identité. Le délai minimal de 300 secondes est persisté avant les consultations, y compris entre lancements manuels. Une exécution retardée peut donc entraîner un contrôle sauté.
+Une vérification ordinaire fait 3 lectures (robots, page, disponibilité). Si deux places sont annoncées, elle fait jusqu'à 2 lectures supplémentaires (tarif, confirmation). Aucun ajout au panier, aucun CAPTCHA résolu, aucun contournement, proxy ou changement d'identité. Un délai minimal de 240 secondes est persisté avant les consultations pour tolérer jusqu'à une minute de variation entre deux démarrages planifiés à cinq minutes d'intervalle. Une exécution très retardée peut encore entraîner un contrôle sauté. Les pauses imposées par le site restent prioritaires.
 
 Les erreurs 401/403 ou une exclusion robots mettent le suivi en pause persistante (`halted`). Les réponses 429/503 imposent une pause d'au moins une heure et respectent un Retry-After plus long. Les autres erreurs n'entraînent pas de nouvelle tentative immédiate.
 
