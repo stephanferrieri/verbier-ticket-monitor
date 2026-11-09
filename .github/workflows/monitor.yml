@@ -1,8 +1,5 @@
 name: Verbier ticket monitor
 on:
-  schedule:
-    - cron: '3,8,13,18,23,28,33,38,43,48,53,58 * * * 1-5'
-      timezone: 'Europe/Zurich'
   workflow_dispatch:
 permissions:
   contents: write
